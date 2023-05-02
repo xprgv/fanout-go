@@ -1,27 +1,22 @@
 package fanout
 
-import "sync/atomic"
-
 type Fanout[T any] struct {
-	dataCh   chan T
-	subs     map[chan T]struct{}
-	subCh    chan chan T
-	unsubCh  chan chan T
-	closeCh  chan struct{}
-	isClosed atomic.Bool
+	dataCh  chan T
+	subs    map[chan T]struct{}
+	subCh   chan chan T
+	unsubCh chan chan T
+	closeCh chan struct{}
 }
 
 // New creates new fanout with special data type
 func New[T any]() Fanout[T] {
 	f := Fanout[T]{
-		dataCh:   make(chan T, 1),
-		subs:     make(map[chan T]struct{}, 1),
-		subCh:    make(chan chan T, 1),
-		unsubCh:  make(chan chan T, 1),
-		closeCh:  make(chan struct{}, 1),
-		isClosed: atomic.Bool{},
+		dataCh:  make(chan T, 1),
+		subs:    make(map[chan T]struct{}, 1),
+		subCh:   make(chan chan T, 1),
+		unsubCh: make(chan chan T, 1),
+		closeCh: make(chan struct{}, 1),
 	}
-	f.isClosed.Store(false)
 
 	go func() {
 		for {
@@ -44,6 +39,12 @@ func New[T any]() Fanout[T] {
 					close(sub)
 					delete(f.subs, sub)
 				}
+				f.subs = nil
+				close(f.subCh)
+				close(f.unsubCh)
+				close(f.dataCh)
+				close(f.closeCh)
+				f.closeCh = nil
 				return
 			}
 		}
@@ -69,7 +70,7 @@ func (f *Fanout[T]) Publish(data T) {
 
 // Close all. Do not use after close
 func (f *Fanout[T]) Close() {
-	if !f.isClosed.Load() {
+	if f.closeCh != nil {
 		f.closeCh <- struct{}{}
 	}
 }
