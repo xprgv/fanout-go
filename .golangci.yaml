@@ -1,0 +1,57 @@
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - asciicheck
+    - decorder
+    - dupl
+    - errchkjson
+    - errorlint
+    - forcetypeassert
+    - goconst
+    - gosec
+    - gocritic
+    - nilnil
+    - makezero
+    - nestif
+    - unconvert
+    - prealloc
+    - usestdlibvars
+    - dupl
+    - nestif
+  disable:
+    - unused
+
+linters-settings:
+  govet:
+    enable:
+      - assign
+      - atomic
+      - bools
+      - composites
+      - copylocks
+      - httpresponse
+      - loopclosure
+      - lostcancel
+      - nilfunc
+      - printf
+      - stdmethods
+      - tests
+      - unmarshal
+      - unreachable
+      - unusedresult
+
+  nestif:
+    min-complexity: 6
+
+run:
+  skip-dirs:
+    - pkg
+    - testutils
+  timeout: 5m
+## description https://pkg.go.dev/cmd/vet
+## description https://golangci-lint.run/usage/linters/#enabled-by-default
